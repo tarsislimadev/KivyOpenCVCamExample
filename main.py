@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import os
+from datetime import datetime
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
@@ -16,6 +18,7 @@ class CameraWidget(Image):
         self.fps = 30
         self.current_filter = 'none'
         self.camera_available = False
+        self.current_frame = None
 
     def start_camera(self):
         if self.capture is None:
@@ -36,6 +39,7 @@ class CameraWidget(Image):
         ret, frame = self.capture.read()
         if ret:
             processed_frame = self.apply_filter(frame)
+            self.current_frame = processed_frame
 
             frame_rgb = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
             frame_flipped = cv2.flip(frame_rgb, 0)
@@ -85,6 +89,22 @@ class CameraWidget(Image):
     def set_filter(self, filter_name):
         self.current_filter = filter_name
 
+    def save_photo(self):
+        if self.current_frame is not None:
+            pictures_dir = os.path.expanduser("~/Pictures")
+            os.makedirs(pictures_dir, exist_ok=True)
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"camera_photo_{timestamp}.jpg"
+            filepath = os.path.join(pictures_dir, filename)
+
+            cv2.imwrite(filepath, self.current_frame)
+            print(f"Photo saved: {filepath}")
+            return True
+        else:
+            print("No frame available to save")
+            return False
+
     def release_camera(self):
         if self.capture is not None:
             self.capture.release()
@@ -113,6 +133,10 @@ class CameraApp(App):
         stop_btn = Button(text='Stop Camera', size_hint=(1, 0.1))
         stop_btn.bind(on_press=self.stop_camera)
         controls_layout.add_widget(stop_btn)
+
+        save_btn = Button(text='Save Photo', size_hint=(1, 0.1))
+        save_btn.bind(on_press=self.save_photo)
+        controls_layout.add_widget(save_btn)
 
         filters_label = Label(text='Filters:', size_hint=(1, 0.08), font_size='16sp')
         controls_layout.add_widget(filters_label)
@@ -144,6 +168,9 @@ class CameraApp(App):
 
     def stop_camera(self, instance):
         self.camera_widget.stop_camera()
+
+    def save_photo(self, instance):
+        self.camera_widget.save_photo()
 
     def set_filter(self, filter_code):
         self.camera_widget.set_filter(filter_code)

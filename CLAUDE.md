@@ -35,35 +35,43 @@ python3 main.py
 
 The application follows a simple two-class architecture:
 
-### CameraWidget (main.py:12-91)
+### CameraWidget (main.py:14-111)
 - Extends Kivy's Image widget
 - Manages OpenCV camera capture (cv2.VideoCapture)
 - Handles real-time frame processing using Kivy's Clock scheduling
 - Contains filter application logic with NumPy operations
 - Converts OpenCV frames to Kivy textures for display
+- Stores current frame for photo saving functionality
 - Key methods:
   - `update_frame()`: Main processing loop scheduled at 30fps
-  - `apply_filter()`: Processes frames with selected filter (main.py:49-83)
+  - `apply_filter()`: Processes frames with selected filter (main.py:53-87)
   - `start_camera()`/`stop_camera()`: Control camera lifecycle
-  - `set_filter()`: Changes current filter (main.py:85-86)
-  - `release_camera()`: Cleanup camera resources (main.py:88-90)
+  - `set_filter()`: Changes current filter (main.py:89-90)
+  - `save_photo()`: Saves current frame to ~/Pictures with timestamp (main.py:92-106)
+  - `release_camera()`: Cleanup camera resources (main.py:108-110)
 
-### CameraApp (main.py:93-156)
+### CameraApp (main.py:113-181)
 - Main Kivy application class
 - Creates GUI layout with camera display and control panel
 - Uses BoxLayout for horizontal/vertical arrangement
 - Binds UI controls to CameraWidget methods
 - Handles application lifecycle (camera cleanup on exit)
-- Filter definitions located in main.py:120-130
+- Filter definitions located in main.py:144-154
 
 ## Key Technical Details
 
 ### Frame Processing Pipeline
 1. OpenCV captures BGR frames from camera
 2. Filter applied via `apply_filter()` method
-3. Frame converted BGR→RGB for Kivy compatibility
-4. Frame flipped vertically (OpenCV/Kivy coordinate difference)
-5. Frame converted to Kivy Texture and displayed
+3. Current frame stored for photo saving (self.current_frame)
+4. Frame converted BGR→RGB for Kivy compatibility
+5. Frame flipped vertically (OpenCV/Kivy coordinate difference)
+6. Frame converted to Kivy Texture and displayed
+
+### Photo Saving
+- Photos saved to ~/Pictures directory with timestamp format: `camera_photo_YYYYMMDD_HHMMSS.jpg`
+- Captures the current filtered frame (not the original raw frame)
+- Directory automatically created if it doesn't exist
 
 ### Filter Implementation
 All filters implemented in `apply_filter()` method using:
@@ -87,12 +95,18 @@ All filters implemented in `apply_filter()` method using:
 ## Common Development Tasks
 
 ### Adding New Filters
-1. Add filter logic to `apply_filter()` method in main.py:49-83
-2. Add filter button entry to filters list in main.py:120-130
+1. Add filter logic to `apply_filter()` method in main.py:53-87
+2. Add filter button entry to filters list in main.py:144-154
 3. Follow existing filter patterns (check for self.current_filter == 'new_filter_name')
 
+### Adding New UI Controls
+- Add button creation in CameraApp.build() method after line 139
+- Bind button to new method using `btn.bind(on_press=self.method_name)`
+- Add corresponding method in CameraApp class that calls CameraWidget method
+- Follow existing patterns like save_photo implementation
+
 ### Modifying GUI Layout
-- Main layout structure defined in CameraApp.build() (main.py:94-140)
+- Main layout structure defined in CameraApp.build() (main.py:114-160)
 - Camera widget takes 70% width, controls take 30%
 - All UI elements use BoxLayout with size_hint parameters
 
