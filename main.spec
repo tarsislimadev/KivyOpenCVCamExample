@@ -8,9 +8,10 @@ a = Analysis(
     binaries=[],
     datas=[],
     hiddenimports=[
-        'kivy.core.window.window_pygame',
+        'kivy.core.window.window_sdl2',
         'kivy.core.image.img_pil',
         'kivy.core.text.markup',
+        'kivy.core.gl',
         'PIL._tkinter_finder',
     ],
     hookspath=[],

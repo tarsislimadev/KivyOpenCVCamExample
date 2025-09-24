@@ -32,6 +32,11 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
 
+    - name: Set environment variables for headless build
+      run: |
+        echo "KIVY_GL_BACKEND=gl" >> $GITHUB_ENV
+        echo "KIVY_WINDOW=sdl2" >> $GITHUB_ENV
+
     - name: Build executable
       run: |
         pyinstaller --onefile --windowed --name=${{ matrix.artifact_name }}${{ matrix.executable_extension }} --specpath . main.py
