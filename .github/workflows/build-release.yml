@@ -11,17 +11,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest]
         include:
-          - os: ubuntu-latest
-            artifact_name: KivyOpenCVCamExample-linux
-            executable_extension: ""
           - os: windows-latest
             artifact_name: KivyOpenCVCamExample-windows
             executable_extension: ".exe"
-          - os: macos-latest
-            artifact_name: KivyOpenCVCamExample-macos
-            executable_extension: ""
 
     steps:
     - uses: actions/checkout@v4
@@ -31,11 +25,6 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Install system dependencies (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev libfontconfig1 libice6
 
     - name: Install Python dependencies
       run: |
@@ -75,16 +64,6 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload Linux Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: artifacts/KivyOpenCVCamExample-linux/KivyOpenCVCamExample-linux
-        asset_name: KivyOpenCVCamExample-linux
-        asset_content_type: application/octet-stream
-
     - name: Upload Windows Release Asset
       uses: actions/upload-release-asset@v1
       env:
@@ -93,14 +72,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: artifacts/KivyOpenCVCamExample-windows/KivyOpenCVCamExample-windows.exe
         asset_name: KivyOpenCVCamExample-windows.exe
-        asset_content_type: application/octet-stream
-
-    - name: Upload macOS Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: artifacts/KivyOpenCVCamExample-macos/KivyOpenCVCamExample-macos
-        asset_name: KivyOpenCVCamExample-macos
         asset_content_type: application/octet-stream
